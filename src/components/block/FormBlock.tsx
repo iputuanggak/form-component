@@ -2,29 +2,47 @@
 
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "../basic/Button";
 import InputField from "../basic/Input";
 import TextAreaField from "../basic/TextArea";
 import SelectField from "../basic/Select";
+import FileInput from "../basic/FileInput";
 
-const schema = z.object({
+const ALLOWED_TYPES = ["image/png", "image/jpeg", "application/pdf"];
+
+const SCHEMA = z.object({
   name: z.string().min(1, "required"),
   email: z.string().email("Invalid email format"),
   phone: z.string().min(1, "required"),
   subject: z.string().min(1, "required"),
   messsage: z.string().min(1, "required"),
+  attachments: z
+    .array(z.instanceof(File))
+    .max(3, "Maximum 3 files allowed")
+    .nonempty({ message: "Please upload at least one file." })
+    .refine(
+      (attachments) =>
+        attachments.every((attachment) =>
+          ALLOWED_TYPES.includes(attachment.type)
+        ),
+      { message: "One or more files have an invalid document type." }
+    )
+    .refine(
+      (attachments) =>
+        attachments.every((attachment) => attachment.size <= 5 * 1024 * 1024), // 5MB
+      { message: "Each file must be smaller than 5MB." }
+    ),
 });
 
 type FormValues = z.infer<typeof schema>;
 
 export default function FormBlock() {
   const methods = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(SCHEMA),
     defaultValues: {
       name: "john doe",
-    }
+    },
   });
 
   const onSubmit = (data: FormValues) => {
@@ -34,7 +52,10 @@ export default function FormBlock() {
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form
+        onSubmit={methods.handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+      >
         <InputField
           name="name"
           label="Name"
@@ -58,7 +79,7 @@ export default function FormBlock() {
           label="messsage"
           description="Input Your Message"
         />
-           <SelectField
+        <SelectField
           name="subject"
           label="Subject"
           options={[
@@ -72,9 +93,14 @@ export default function FormBlock() {
             { value: "option8", label: "option8" },
             { value: "option9", label: "option9" },
             { value: "option10", label: "option10" },
-          
           ]}
           description="Choose the topic that best matches your inquiry."
+        />
+        <FileInput
+          maxFiles={3}
+          name="attachments"
+          maxSizeMB={5}
+          accept={["image/png", "image/jpeg", "application/pdf"]}
         />
         <Button className="place-self-start">Submit</Button>
       </form>
