@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
+import MaterialSymbol from "./MaterialSymbol";
 
 interface FileInputProps {
   name: string;
@@ -7,6 +8,16 @@ interface FileInputProps {
   maxSizeMB?: number;
   maxFiles?: number;
   accept?: string[]; // e.g. ['image/png', 'application/pdf']
+}
+
+function mimeTypesToExtensions(mimeTypes: string[]): string {
+  return mimeTypes
+    .map((type) => type.split("/")[1]) // Extract the part after the slash
+    .join(", ");
+}
+
+function mimeToExtension(mime: string): string {
+  return mime.split("/")[1];
 }
 
 export default function FileInput({
@@ -42,7 +53,7 @@ export default function FileInput({
         continue;
       }
       if (accept && !accept.includes(file.type)) {
-        error = `File type "${file.type}" not accepted.`;
+        error = `File type "${mimeToExtension(file.type)}" not accepted.`;
         continue;
       }
       if (file.size > maxSizeMB * 1024 * 1024) {
@@ -128,11 +139,12 @@ export default function FileInput({
               Drag & drop files here, or click to browse
             </p>
             <p className="text-sm text-gray-500">
-              {accept ? `(Format ${mimeTypesToExtensions(accept)})` : ""}
+              {accept ? `(formats: ${mimeTypesToExtensions(accept)})` : ""}
             </p>
             <p className="text-sm text-gray-500">
-              {maxFiles ? `(Max ${maxFiles} files)` : ""}
+              {maxFiles ? `(max ${maxFiles} files)` : ""}
             </p>
+
             {errors[name] && (
               <p className="text-sm text-red-500 mt-1">
                 {(errors[name] as any).message}
@@ -166,15 +178,7 @@ export default function FileInput({
                     setRejectionError(null);
                   }}
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    height="24px"
-                    viewBox="0 -960 960 960"
-                    width="24px"
-                    fill="#09090b"
-                  >
-                    <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
-                  </svg>
+                  <MaterialSymbol iconName="close" />
                 </button>
               </li>
             ))}
