@@ -1,6 +1,5 @@
 import React, { useRef, useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
-import MaterialSymbol from "./MaterialSymbol";
 
 interface FileInputProps {
   name: string;
@@ -84,25 +83,36 @@ export default function FileInput({
       name={name}
       defaultValue={[]}
       render={({ field: { onChange, value } }) => (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-0.5">
           {label ? <label htmlFor={name}>{label}</label> : null}
           <div
-            className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition 
+            className={`border border-dashed rounded p-4 text-center cursor-pointer transition 
               ${
                 errors[name]
                   ? "border-red-500 bg-red-50 "
-                  : "border-gray-300 hover:border-blue-500 "
+                  : "border-gray-300 hover:border-black hover:bg-gray-100 "
               } 
               ${
                 dragActive
-                  ? "border-blue-500 bg-blue-50 "
-                  : "border-gray-300 hover:border-blue-500 "
+                  ? "border-black bg-gray-100 "
+                  : "border-gray-300 hover:border-black hover:bg-gray-100 "
               }
                ${
                  maxFiles &&
                  value?.length >= maxFiles &&
-                 "opacity-50 cursor-not-allowed "
+                 "opacity-50 hover:cursor-not-allowed hover:bg-gray-100 "
                }`}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (
+                (e.key === "Enter" || e.key === " ") &&
+                (!maxFiles || value.length < maxFiles)
+              ) {
+                e.preventDefault();
+                inputRef.current?.click();
+              }
+            }}
             onClick={() => {
               if (!maxFiles || value.length < maxFiles) {
                 inputRef.current?.click();
@@ -135,13 +145,13 @@ export default function FileInput({
               }}
               accept={accept?.join(",")}
             />
-            <p className="text-sm text-gray-500">
+            <p className="text-gray-500">
               Drag & drop files here, or click to browse
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-zinc-400">
               {accept ? `(formats: ${mimeTypesToExtensions(accept)})` : ""}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-zinc-400">
               {maxFiles ? `(max ${maxFiles} files)` : ""}
             </p>
 
@@ -155,7 +165,7 @@ export default function FileInput({
             )}
           </div>
           {/* File List */}
-          <ul className="space-y-1 text-sm">
+          <ul className="space-y-0.5 text-sm">
             {(value || []).map((file: File, idx: number) => (
               <li
                 key={idx}
@@ -178,7 +188,15 @@ export default function FileInput({
                     setRejectionError(null);
                   }}
                 >
-                  <MaterialSymbol iconName="close" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="24px"
+                    viewBox="0 -960 960 960"
+                    width="24px"
+                    fill="#09090b"
+                  >
+                    <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
+                  </svg>
                 </button>
               </li>
             ))}

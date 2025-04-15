@@ -12,11 +12,11 @@ import FileInput from "../basic/FileInput";
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "application/pdf"];
 
 const SCHEMA = z.object({
-  name: z.string().min(1, "required"),
+  name: z.string().min(1, "Required"),
   email: z.string().email("Invalid email format"),
-  phone: z.string().min(1, "required"),
-  subject: z.string().min(1, "required"),
-  messsage: z.string().min(1, "required"),
+  phone: z.string().min(1, "Required"),
+  subject: z.string().min(1, "Required"),
+  messsage: z.string().min(1, "Required"),
   attachments: z
     .array(z.instanceof(File))
     .max(3, "Maximum 3 files allowed")
@@ -97,6 +97,7 @@ export default function FormBlock() {
           description="Choose the topic that best matches your inquiry."
         />
         <FileInput
+          label="Attachments"
           maxFiles={3}
           name="attachments"
           maxSizeMB={5}

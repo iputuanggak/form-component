@@ -25,21 +25,15 @@ export default function SelectField({
   } = useFormContext();
 
   const [isOpen, setIsOpen] = useState(false);
-  const defaultValue = getValues(name) || null;
-  const [selected, setSelected] = useState<string | null>(defaultValue);
+  const [selected, setSelected] = useState<string | null>(
+    getValues(name) || null
+  );
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+
   const dropdownRef = useRef<HTMLDivElement>(null);
   const optionsRef = useRef<(HTMLLIElement | null)[]>([]);
 
   const errorMessage = errors[name]?.message as string | undefined;
-
-  const toggleDropdown = () => {
-    {
-      setIsOpen((prev) => !prev);
-      setHighlightedIndex(-1);
-    }
-  };
-  const closeDropdown = () => setIsOpen(false);
 
   const handleSelect = (value: string) => {
     setSelected(value);
@@ -47,6 +41,23 @@ export default function SelectField({
     trigger(name);
     closeDropdown();
   };
+
+  const toggleDropdown = () => {
+    setIsOpen((prev) => {
+      const opening = !prev;
+      if (opening) {
+        const selectedIndex = options.findIndex(
+          (opt) => opt.value === selected
+        );
+        setHighlightedIndex(selectedIndex !== -1 ? selectedIndex : -1);
+      } else {
+        setHighlightedIndex(-1);
+      }
+      return opening;
+    });
+  };
+
+  const closeDropdown = () => setIsOpen(false);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (!isOpen) {
@@ -69,8 +80,9 @@ export default function SelectField({
         e.preventDefault();
         break;
       case "Enter":
-        handleSelect(options[highlightedIndex].value);
-        setHighlightedIndex(0);
+        if (highlightedIndex >= 0 && highlightedIndex < options.length) {
+          handleSelect(options[highlightedIndex].value);
+        }
         e.preventDefault();
         break;
       case "Escape":
@@ -81,8 +93,23 @@ export default function SelectField({
   };
 
   useEffect(() => {
-    setSelected(getValues(name) || null);
-  }, [getValues(name)]);
+    const selectedIndex = options.findIndex((opt) => opt.value === selected);
+    if (isOpen && selectedIndex !== -1) {
+      setHighlightedIndex(selectedIndex);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (
+      isOpen &&
+      highlightedIndex !== -1 &&
+      optionsRef.current[highlightedIndex]
+    ) {
+      optionsRef.current[highlightedIndex]?.scrollIntoView({
+        block: "nearest",
+      });
+    }
+  }, [highlightedIndex, isOpen]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -97,23 +124,13 @@ export default function SelectField({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    if (isOpen && optionsRef.current[highlightedIndex]) {
-      optionsRef.current[highlightedIndex]?.scrollIntoView({
-        block: "nearest",
-      });
-    }
-  }, [highlightedIndex, isOpen]);
-
   return (
-    <div className={`relative flex flex-col gap-0.5 ${className || ""}`}>
-      <label className="text-sm font-medium" htmlFor={name}>
-        {label}
-      </label>
-      <Controller
-        name={name}
-        control={control}
-        render={() => (
+    <Controller
+      name={name}
+      control={control}
+      render={() => (
+        <div className={`relative flex flex-col gap-0.5 ${className || ""}`}>
+          <label htmlFor={name}>{label}</label>
           <div
             ref={dropdownRef}
             className="relative"
@@ -155,18 +172,16 @@ export default function SelectField({
                   <li
                     key={option.value}
                     ref={(el) => {
-                      if (el) {
-                        optionsRef.current[index] = el;
-                      }
+                      optionsRef.current[index] = el;
                     }}
                     role="option"
                     aria-selected={option.value === selected}
                     tabIndex={-1}
                     onClick={(e) => {
-                      e.stopPropagation;
+                      e.stopPropagation();
                       handleSelect(option.value);
                     }}
-                    className={`px-3 py-2 cursor-pointer flex justify-between items-center hover:bg-gray-100 ${
+                    className={`px-3 py-2 cursor-pointer flex justify-between rounded items-center hover:bg-gray-100 ${
                       option.value === selected ? "bg-gray-200" : ""
                     } ${
                       highlightedIndex === index ? "border border-black" : ""
@@ -189,14 +204,14 @@ export default function SelectField({
               </ul>
             )}
           </div>
-        )}
-      />
-      {description && (
-        <p className="text-sm text-zinc-400 mt-1">{description}</p>
+          {description && (
+            <p className="text-sm text-zinc-400">{description}</p>
+          )}
+          {errorMessage && (
+            <p className="text-sm text-red-500">{errorMessage}</p>
+          )}
+        </div>
       )}
-      {errorMessage && (
-        <p className="text-sm text-red-500 mt-1">{errorMessage}</p>
-      )}
-    </div>
+    />
   );
 }
