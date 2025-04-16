@@ -7,6 +7,7 @@ interface FileInputProps {
   maxSizeMB?: number;
   maxFiles?: number;
   accept?: string[]; // e.g. ['image/png', 'application/pdf']
+  disabled?: boolean;
 }
 
 function mimeTypesToExtensions(mimeTypes: string[]): string {
@@ -22,9 +23,10 @@ function mimeToExtension(mime: string): string {
 export default function FileInput({
   name,
   label,
-  maxSizeMB = 5,
+  maxSizeMB = 999,
   maxFiles,
   accept,
+  disabled = false,
 }: FileInputProps) {
   const {
     control,
@@ -83,7 +85,9 @@ export default function FileInput({
       name={name}
       defaultValue={[]}
       render={({ field: { onChange, value } }) => (
-        <div className="flex flex-col gap-0.5">
+        <div
+          className={`flex flex-col gap-0.5 ${disabled ? "opacity-50" : ""}`}
+        >
           {label ? <label htmlFor={name}>{label}</label> : null}
           <div
             className={`flex min-h-28 cursor-pointer flex-col items-center justify-center rounded border border-dashed p-4 transition ${
@@ -98,9 +102,12 @@ export default function FileInput({
               dragActive
                 ? "!border-zinc-900 !bg-zinc-50"
                 : "hover:border-zinc-900 hover:bg-zinc-100"
-            } `}
+            } ${
+              disabled &&
+              "!cursor-not-allowed hover:!border-transparent hover:!bg-transparent"
+            }`}
             role="button"
-            tabIndex={0}
+            tabIndex={disabled ? -1 : 0}
             onKeyDown={(e) => {
               if (
                 (e.key === "Enter" || e.key === " ") &&
@@ -141,12 +148,13 @@ export default function FileInput({
                 e.target.value = "";
               }}
               accept={accept?.join(",")}
+              disabled={disabled}
             />
             <p className="text-zinc-500">
               Drag & drop files here, or click to browse
             </p>
             <p className="text-sm text-zinc-400">
-              {accept ? `formats: ${mimeTypesToExtensions(accept)}` : ""}
+              {accept ? `accepts: ${mimeTypesToExtensions(accept)}` : ""}
               <span className="text-sm text-zinc-400">
                 {maxFiles ? ` (max ${maxFiles} files)` : ""}
               </span>
@@ -177,12 +185,17 @@ export default function FileInput({
                 <button
                   type="button"
                   className="text-red-500 hover:text-red-700"
-                  onClick={() => {
-                    const newFiles = [...value];
-                    newFiles.splice(idx, 1);
-                    onChange(newFiles);
-                    setRejectionError(null);
-                  }}
+                  onClick={
+                    disabled
+                      ? () => {}
+                      : () => {
+                          const newFiles = [...value];
+                          newFiles.splice(idx, 1);
+                          onChange(newFiles);
+                          setRejectionError(null);
+                        }
+                  }
+                  tabIndex={disabled ? -1 : 0}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

@@ -24,18 +24,18 @@ const SCHEMA = z.object({
     .refine(
       (attachments) =>
         attachments.every((attachment) =>
-          ALLOWED_TYPES.includes(attachment.type)
+          ALLOWED_TYPES.includes(attachment.type),
         ),
-      { message: "One or more files have an invalid document type." }
+      { message: "One or more files have an invalid document type." },
     )
     .refine(
       (attachments) =>
         attachments.every((attachment) => attachment.size <= 5 * 1024 * 1024), // 5MB
-      { message: "Each file must be smaller than 5MB." }
+      { message: "Each file must be smaller than 5MB." },
     ),
 });
 
-type FormValues = z.infer<typeof schema>;
+type FormValues = z.infer<typeof SCHEMA>;
 
 export default function FormBlock() {
   const methods = useForm<FormValues>({
@@ -61,6 +61,7 @@ export default function FormBlock() {
           label="Name"
           description="Please provide your name so we know how to address you."
           placeholder="e.g Alex Taylor"
+          disabled
         />
         <InputField
           name="email"
@@ -76,7 +77,7 @@ export default function FormBlock() {
         />
         <TextAreaField
           name="messsage"
-          label="messsage"
+          label="Messsage"
           description="Input Your Message"
         />
         <SelectField

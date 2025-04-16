@@ -5,8 +5,8 @@ type SelectFieldProps = {
   name: string;
   label: string;
   description?: string;
-  className?: string;
   options: { value: string; label: string }[];
+  disabled?: boolean;
 };
 
 export default function SelectField({
@@ -14,7 +14,7 @@ export default function SelectField({
   label,
   description,
   options,
-  className,
+  disabled = false,
 }: SelectFieldProps) {
   const {
     control,
@@ -26,7 +26,7 @@ export default function SelectField({
 
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<string | null>(
-    getValues(name) || null
+    getValues(name) || null,
   );
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
@@ -47,7 +47,7 @@ export default function SelectField({
       const opening = !prev;
       if (opening) {
         const selectedIndex = options.findIndex(
-          (opt) => opt.value === selected
+          (opt) => opt.value === selected,
         );
         setHighlightedIndex(selectedIndex !== -1 ? selectedIndex : -1);
       } else {
@@ -75,7 +75,7 @@ export default function SelectField({
         break;
       case "ArrowUp":
         setHighlightedIndex(
-          (prev) => (prev - 1 + options.length) % options.length
+          (prev) => (prev - 1 + options.length) % options.length,
         );
         e.preventDefault();
         break;
@@ -129,23 +129,30 @@ export default function SelectField({
       name={name}
       control={control}
       render={() => (
-        <div className={`relative flex flex-col gap-0.5 ${className || ""}`}>
+        <div
+          className={`relative flex flex-col gap-0.5 ${disabled ? "opacity-50" : ""}`}
+        >
           <label htmlFor={name}>{label}</label>
           <div
             ref={dropdownRef}
             className="relative"
-            tabIndex={0}
+            tabIndex={disabled ? -1 : 0}
             role="combobox"
+            aria-controls=""
             aria-expanded={isOpen}
             aria-haspopup="listbox"
             aria-labelledby={name}
-            onKeyDown={handleKeyDown}
+            onKeyDown={disabled ? () => {} : handleKeyDown}
           >
             <div
-              className={`border px-3 py-2 rounded flex justify-between items-center cursor-pointer hover:bg-zinc-50  ${
-                errorMessage ? "border-red-500 bg-red-50 hover:!bg-red-100" : "hover:border-zinc-900"
+              className={`flex cursor-pointer items-center justify-between rounded border px-3 py-2  ${
+                errorMessage
+                  ? "border-red-500 bg-red-50 hover:!bg-red-100"
+                  : disabled
+                    ? "cursor-not-allowed"
+                    : "hover:border-zinc-900 hover:bg-zinc-50"
               }`}
-              onClick={toggleDropdown}
+              onClick={disabled ? () => {} : toggleDropdown}
             >
               <span className={selected ? "" : "text-zinc-400"}>
                 {selected
@@ -165,7 +172,7 @@ export default function SelectField({
 
             {isOpen && (
               <ul
-                className="absolute top-full left-0 w-full bg-white shadow-lg rounded mt-1 z-20 border max-h-60 overflow-y-auto"
+                className="absolute left-0 top-full z-20 mt-1 max-h-60 w-full overflow-y-auto rounded border bg-white shadow-lg"
                 role="listbox"
               >
                 {options.map((option, index) => (
@@ -181,7 +188,7 @@ export default function SelectField({
                       e.stopPropagation();
                       handleSelect(option.value);
                     }}
-                    className={`px-3 py-2 cursor-pointer flex justify-between rounded items-center hover:bg-zinc-100 ${
+                    className={`flex cursor-pointer items-center justify-between rounded px-3 py-2 hover:bg-zinc-100 ${
                       option.value === selected ? "bg-zinc-200" : ""
                     } ${
                       highlightedIndex === index ? "border border-zinc-900" : ""
