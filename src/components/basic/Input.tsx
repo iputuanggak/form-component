@@ -34,8 +34,8 @@ export default function InputField({
         {...register(name)}
         {...inputProps}
         onWheel={handleWheel}
-        className={`border px-3 py-1.5 rounded ${
-          errorMessage ? "border-red-500" : ""
+        className={`rounded border px-3 py-1.5 hover:bg-zinc-50 ${
+          errorMessage ? "border-red-500 bg-red-50 hover:!bg-red-100" : "hover:border-zinc-900"
         } ${className || ""}`}
       />
       {description && <p className="text-sm text-zinc-400">{description}</p>}

@@ -142,12 +142,12 @@ export default function SelectField({
             onKeyDown={handleKeyDown}
           >
             <div
-              className={`border px-3 py-2 rounded flex justify-between items-center cursor-pointer ${
-                errorMessage ? "border-red-500" : "border-gray-300"
+              className={`border px-3 py-2 rounded flex justify-between items-center cursor-pointer hover:bg-zinc-50  ${
+                errorMessage ? "border-red-500 bg-red-50 hover:!bg-red-100" : "hover:border-zinc-900"
               }`}
               onClick={toggleDropdown}
             >
-              <span className={selected ? "" : "text-gray-400"}>
+              <span className={selected ? "" : "text-zinc-400"}>
                 {selected
                   ? options.find((o) => o.value === selected)?.label
                   : `Select a ${label}`}
@@ -181,10 +181,10 @@ export default function SelectField({
                       e.stopPropagation();
                       handleSelect(option.value);
                     }}
-                    className={`px-3 py-2 cursor-pointer flex justify-between rounded items-center hover:bg-gray-100 ${
-                      option.value === selected ? "bg-gray-200" : ""
+                    className={`px-3 py-2 cursor-pointer flex justify-between rounded items-center hover:bg-zinc-100 ${
+                      option.value === selected ? "bg-zinc-200" : ""
                     } ${
-                      highlightedIndex === index ? "border border-black" : ""
+                      highlightedIndex === index ? "border border-zinc-900" : ""
                     }`}
                   >
                     {option.label}

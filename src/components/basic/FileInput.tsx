@@ -69,7 +69,7 @@ export default function FileInput({
   const addFiles = (
     incoming: File[],
     current: File[],
-    onChange: (files: File[]) => void
+    onChange: (files: File[]) => void,
   ) => {
     const toAdd = filterFiles(incoming, current);
     if (toAdd.length > 0) {
@@ -86,22 +86,19 @@ export default function FileInput({
         <div className="flex flex-col gap-0.5">
           {label ? <label htmlFor={name}>{label}</label> : null}
           <div
-            className={`border border-dashed rounded p-4 text-center cursor-pointer transition 
-              ${
-                errors[name]
-                  ? "border-red-500 bg-red-50 "
-                  : "border-gray-300 hover:border-black hover:bg-gray-100 "
-              } 
-              ${
-                dragActive
-                  ? "border-black bg-gray-100 "
-                  : "border-gray-300 hover:border-black hover:bg-gray-100 "
-              }
-               ${
-                 maxFiles &&
-                 value?.length >= maxFiles &&
-                 "opacity-50 hover:cursor-not-allowed hover:bg-gray-100 "
-               }`}
+            className={`flex min-h-28 cursor-pointer flex-col items-center justify-center rounded border border-dashed p-4 transition ${
+              errors[name]
+                ? "!border-red-500 !bg-red-50 hover:!bg-red-100"
+                : "hover:border-zinc-900 hover:bg-zinc-50"
+            } ${
+              maxFiles &&
+              value?.length >= maxFiles &&
+              "!cursor-not-allowed !opacity-50 hover:!border-transparent hover:!bg-transparent"
+            } ${
+              dragActive
+                ? "!border-zinc-900 !bg-zinc-50"
+                : "hover:border-zinc-900 hover:bg-zinc-100"
+            } `}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => {
@@ -145,23 +142,22 @@ export default function FileInput({
               }}
               accept={accept?.join(",")}
             />
-            <p className="text-gray-500">
+            <p className="text-zinc-500">
               Drag & drop files here, or click to browse
             </p>
             <p className="text-sm text-zinc-400">
-              {accept ? `(formats: ${mimeTypesToExtensions(accept)})` : ""}
+              {accept ? `formats: ${mimeTypesToExtensions(accept)}` : ""}
+              <span className="text-sm text-zinc-400">
+                {maxFiles ? ` (max ${maxFiles} files)` : ""}
+              </span>
             </p>
-            <p className="text-sm text-zinc-400">
-              {maxFiles ? `(max ${maxFiles} files)` : ""}
-            </p>
-
+            {rejectionError && (
+              <p className="mt-1 text-sm text-orange-500">{rejectionError}</p>
+            )}
             {errors[name] && (
-              <p className="text-sm text-red-500 mt-1">
+              <p className="mt-1 text-sm text-red-500">
                 {(errors[name] as any).message}
               </p>
-            )}
-            {rejectionError && (
-              <p className="text-sm text-orange-500 mt-1">{rejectionError}</p>
             )}
           </div>
           {/* File List */}
@@ -169,11 +165,11 @@ export default function FileInput({
             {(value || []).map((file: File, idx: number) => (
               <li
                 key={idx}
-                className="flex items-center justify-between border p-2 rounded-md"
+                className="flex items-center justify-between rounded-md border p-2"
               >
                 <div>
                   <p className="font-medium">{file.name}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-zinc-500">
                     {(file.size / 1024 / 1024).toFixed(2)} MB &middot;{" "}
                     {file.type || "unknown"}
                   </p>

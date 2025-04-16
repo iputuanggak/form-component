@@ -4,7 +4,7 @@ type TextAreaFieldProps = {
   name: string;
   label: string;
   description?: string;
-} & React.TextareaHTMLAttributes<HTMLTextAreaElement>
+} & React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
 export default function TextAreaField({
   name,
@@ -29,8 +29,8 @@ export default function TextAreaField({
         {...register(name)}
         {...textareaProps}
         rows={rows}
-        className={`rounded border px-3 py-1.5 ${
-          errorMessage ? "border-red-500" : ""
+        className={`rounded border px-3 py-1.5 hover:bg-zinc-50 ${
+          errorMessage ? "border-red-500 bg-red-50 hover:!bg-red-100" : "hover:border-zinc-900"
         } ${className || ""}`}
       />
       {description && <p className="text-sm text-zinc-400">{description}</p>}
